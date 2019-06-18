@@ -1,0 +1,86 @@
+- name: set hostname
+  hostname:
+    name: "{{ hostname }}"
+
+- block:
+  - name: Update all packages to the latest version
+    apt:
+      upgrade: dist
+
+  - name: Add Camptocamp key
+    apt_key:
+      keyserver: hkp://keyserver.ubuntu.com:80
+      id: 25167F35256F82B2CA594A3DF4831166EFDCBABE
+      state: present
+
+  - name: Configure Camptocamp repository
+    apt_repository:
+      repo: deb http://pkg.camptocamp.net/apt {{ ansible_distribution_release }}/staging sysadmin docker
+      state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- block:
+  - name: Configure Camptocamp repository
+    yum_repository:
+      name: c2c-puppetlabs
+      description: Camptocamp-$releasever - Puppetlabs
+      baseurl: http://pkg.camptocamp.net/yum/puppetlabs/$releasever/$basearch/
+      gpgcheck: 0
+
+  - name: Update all packages to the latest version
+    yum:
+      update_cache: yes
+      name: '*'
+      state: latest
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Create /etc/puppetlabs/puppet directory
+  file:
+    path: /etc/puppetlabs/puppet
+    state: directory
+    recurse: "yes"
+  register: puppet_directory_creation
+
+- name: Deploy csr_attributes.yaml
+  copy:
+    dest: /etc/puppetlabs/puppet/csr_attributes.yaml
+    content: |
+      custom_attributes:
+        1.2.840.113549.1.9.7: "{{ puppet_autosign_challenge }}"
+      extension_requests:
+        pp_role: "{{ puppet_role }}"
+        pp_environment: "{{ puppet_environment }}"
+
+- name: Create puppet.conf file
+  copy:
+    dest: /etc/puppetlabs/puppet/puppet.conf
+    content: |
+      [agent]
+      server = {{ puppet_server }}
+      ca_server = {{ puppet_caserver }}
+      environment = {{ puppet_environment }}
+      http_read_timeout = 120
+      show_diff = true
+      splay = true
+      usecacheonfailure = false
+
+- name: Install Puppet
+  package:
+    name: puppet-agent
+    state: latest
+
+- name: Run Puppet
+  command: /opt/puppetlabs/bin/puppet agent -t
+  args:
+    creates: /etc/puppetlabs/puppet/ssl/certs/ca.pem
+  ignore_errors: true
+
+- name: Reboot (first run only)
+  shell: sleep 2 && reboot
+  async: 1
+  poll: 0
+  when: puppet_directory_creation.changed
+
+- name: Waiting for node to reboot
+  wait_for_connection:
+    timeout: 999999
