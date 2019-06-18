@@ -34,10 +34,10 @@ data "aws_ami" "ami" {
 }
 
 module "instance" {
-  source = "git::ssh://git@github.com/camptocamp/terraform-instance-aws.git"
+  source         = "git::ssh://git@github.com/camptocamp/terraform-instance-aws.git"
+  instance_count = var.instance_count
 
   security_groups     = ["sg-064a964f60b3b4d6f"]
-  instance_count      = var.instance_count
   instance_image      = data.aws_ami.ami.id
   instance_subnet_ids = ["subnet-0ae8b71b5b9926c31"]
   instance_type       = "t2.micro"
@@ -48,21 +48,23 @@ module "instance" {
 module "puppet-node" {
   source = "../"
 
-  instance_count = var.instance_count
-  hostnames      = module.instance.private_dns
-
-  puppet_autosign_psk = data.pass_password.puppet_autosign_psk.data["puppet_autosign_psk"]
-  puppet_server       = "puppet.camptocamp.net"
-  puppet_caserver     = "puppetca.camptocamp.net"
-  puppet_role         = "base"
-  puppet_environment  = "staging4"
-
-  connection = [
+  instances = [
     for i in range(var.instance_count) :
     {
-      host = module.instance.public_ips[i]
+      hostname = module.instance.this_instance_private_dns[i]
+      connection = {
+        host = module.instance.this_instance_public_ip[i]
+      }
     }
   ]
+
+  puppet = {
+    autosign_psk = data.pass_password.puppet_autosign_psk.data["puppet_autosign_psk"]
+    server       = "puppet.camptocamp.net"
+    caserver     = "puppetca.camptocamp.net"
+    role         = "base"
+    environment  = "staging4"
+  }
 }
 
 ###
@@ -73,7 +75,7 @@ resource "null_resource" "acceptance" {
   count      = var.instance_count
 
   connection {
-    host = module.instance.public_ips[count.index]
+    host = module.instance.this_instance_public_ip[count.index]
     type = "ssh"
     user = "root"
   }

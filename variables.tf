@@ -1,31 +1,16 @@
-variable "connection" {
-  type = list
+variable "instances" {
+  type = list(object({
+    hostname   = string
+    connection = any
+  }))
 }
 
-variable "instance_count" {
-  type = number
-}
-
-variable "puppet_role" {
-  type = string
-}
-
-variable "puppet_environment" {
-  type = string
-}
-
-variable "puppet_caserver" {
-  type = string
-}
-
-variable "puppet_server" {
-  type = string
-}
-
-variable "hostnames" {
-  type = list(string)
-}
-
-variable "puppet_autosign_psk" {
-  type = string
+variable "puppet" {
+  type = object({
+    server       = string
+    role         = string
+    environment  = string
+    caserver     = string
+    autosign_psk = string
+  })
 }
