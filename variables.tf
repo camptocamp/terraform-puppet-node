@@ -1,3 +1,7 @@
+variable "instance_count" {
+  type = number
+}
+
 variable "instances" {
   type = list(object({
     hostname   = string
@@ -13,4 +17,10 @@ variable "puppet" {
     caserver     = string
     autosign_psk = string
   })
+}
+
+# Workaround to create explicit dependencies
+variable "deps_on" {
+  type    = list(string)
+  default = []
 }

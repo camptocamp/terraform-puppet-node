@@ -1,18 +1,19 @@
 resource "puppetdb_node" "this" {
-  count = length(var.instances)
+  count = var.instance_count
 
   certname = var.instances[count.index].hostname
 }
 
 resource "puppetca_certificate" "this" {
-  count = length(var.instances)
+  count = var.instance_count
 
 
   name = var.instances[count.index].hostname
 }
 
 resource "null_resource" "provisioner" {
-  count = length(var.instances)
+  # Workaround to use explicit dependencies
+  count = (length(var.deps_on) > 0 ? var.instance_count : 0)
 
   connection {
     type                = lookup(var.instances[count.index].connection, "type", null)
