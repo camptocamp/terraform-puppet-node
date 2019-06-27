@@ -13,7 +13,7 @@ resource "puppetca_certificate" "this" {
 
 resource "null_resource" "provisioner" {
   # Workaround to use explicit dependencies
-  count = (length(var.deps_on) > 0 ? var.instance_count : 0)
+  count = var.instance_count
 
   connection {
     type                = lookup(var.instances[count.index].connection, "type", null)
@@ -58,6 +58,8 @@ resource "null_resource" "provisioner" {
         puppet_environment        = var.puppet.environment
         puppet_caserver           = var.puppet.caserver
         puppet_server             = var.puppet.server
+
+        foo = join(" ", var.deps_on)
       }
     }
   }
