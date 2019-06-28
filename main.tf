@@ -53,11 +53,13 @@ resource "null_resource" "provisioner" {
       extra_vars = {
         hostname = var.instances[count.index].hostname
 
-        puppet_autosign_challenge = "${format("hashed;%s", base64sha256(format("%s/%s/%s/%s", var.puppet.autosign_psk, var.instances[count.index].hostname, var.puppet.role, var.puppet.environment)))}"
-        puppet_role               = var.puppet.role
-        puppet_environment        = var.puppet.environment
-        puppet_caserver           = var.puppet.caserver
-        puppet_server             = var.puppet.server
+        puppet_autosign_challenge = "${format("hashed;%s", base64sha256(format("%s/%s/%s/%s", var.autosign_psk, var.instances[count.index].hostname, var.role, var.environment)))}"
+        puppet_role               = var.role
+        puppet_environment        = var.environment
+        puppet_caserver           = var.ca_server_address
+        puppet_caport             = var.ca_server_port
+        puppet_server             = var.server_address
+        puppet_port               = var.server_port
 
         foo = join(" ", var.deps_on)
       }

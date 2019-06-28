@@ -58,13 +58,11 @@ module "puppet-node" {
     }
   ]
 
-  puppet = {
-    autosign_psk = data.pass_password.puppet_autosign_psk.data["puppet_autosign_psk"]
-    server       = "puppet.camptocamp.net"
-    caserver     = "puppetca.camptocamp.net"
-    role         = "base"
-    environment  = "staging4"
-  }
+  autosign_psk      = data.pass_password.puppet_autosign_psk.data["puppet_autosign_psk"]
+  server_address    = "puppet.camptocamp.net"
+  ca_server_address = "puppetca.camptocamp.net"
+  role              = "base"
+  environment       = "staging4"
 }
 
 ###

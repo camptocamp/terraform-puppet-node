@@ -10,14 +10,34 @@ variable "instances" {
   }))
 }
 
-variable "puppet" {
-  type = object({
-    server       = string
-    role         = string
-    environment  = string
-    caserver     = string
-    autosign_psk = string
-  })
+variable "server_address" {
+  type = string
+}
+
+variable "ca_server_address" {
+  type = string
+}
+
+variable "server_port" {
+  type    = number
+  default = 8140
+}
+
+variable "ca_server_port" {
+  type    = number
+  default = 8140
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "role" {
+  type = string
+}
+
+variable "autosign_psk" {
+  type = string
 }
 
 # Workaround to create explicit dependencies

@@ -59,6 +59,8 @@
       server = {{ puppet_server }}
       ca_server = {{ puppet_caserver }}
       environment = {{ puppet_environment }}
+      masterport = {{ puppet_port }}
+      ca_port =  {{ puppet_caport }}
       http_read_timeout = 120
       show_diff = true
       splay = true
