@@ -20,12 +20,12 @@ variable "ca_server_address" {
 
 variable "server_port" {
   type    = number
-  default = 8140
+  default = 443
 }
 
 variable "ca_server_port" {
   type    = number
-  default = 8140
+  default = 443
 }
 
 variable "environment" {
