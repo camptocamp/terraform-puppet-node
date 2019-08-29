@@ -32,7 +32,7 @@
       update_cache: yes
       name: '*'
       state: latest
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
 
 - name: Create /etc/puppetlabs/puppet directory
   file:
