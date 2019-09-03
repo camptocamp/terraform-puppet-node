@@ -2,6 +2,12 @@
   hostname:
     name: "{{ hostname }}"
 
+- name: prevent cloud-init from reverting hostname
+  lineinfile:
+    dest: /etc/cloud/cloud.cfg
+    regexp: '^preserve_hostname:.*'
+    line: 'preserve_hostname: true'
+
 - block:
   - name: Update all packages to the latest version
     apt:
