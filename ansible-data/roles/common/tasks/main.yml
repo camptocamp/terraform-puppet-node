@@ -2,11 +2,17 @@
   hostname:
     name: "{{ hostname }}"
 
+- name: check if cloud.cfg file exists
+  stat:
+    path: /etc/cloud/cloud.cfg
+  register: cloud_cfg
+
 - name: prevent cloud-init from reverting hostname
   lineinfile:
     dest: /etc/cloud/cloud.cfg
     regexp: '^preserve_hostname:.*'
     line: 'preserve_hostname: true'
+  when: cloud_cfg.stat.exists == true
 
 - block:
   - name: Update all packages to the latest version
