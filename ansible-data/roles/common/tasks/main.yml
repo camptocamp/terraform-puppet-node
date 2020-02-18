@@ -32,12 +32,25 @@
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - block:
-  - name: Configure Camptocamp repository
-    yum_repository:
-      name: c2c-puppetlabs
-      description: Camptocamp-$releasever - Puppetlabs
-      baseurl: http://pkg.camptocamp.net/yum/puppetlabs/$releasever/$basearch/
-      gpgcheck: 0
+  - block:
+    - name: Add PuppetLabs key
+      rpm_key:
+        key: https://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs
+        state: present
+    - name: Configure PuppetLabs repository
+      yum_repository:
+        name: puppetlabs
+        description: Puppetlabs
+        baseurl: http://yum.puppetlabs.com/puppet5/el/$releasever/$basearch/
+    when: ansible_distribution_major_version >= '8'
+  - block:
+    - name: Configure Camptocamp repository
+      yum_repository:
+        name: c2c-puppetlabs
+        description: Camptocamp-$releasever - Puppetlabs
+        baseurl: http://pkg.camptocamp.net/yum/puppetlabs/$releasever/$basearch/
+        gpgcheck: 0
+    when: ansible_distribution_major_version <= '7'
 
   - name: Update all packages to the latest version
     yum:
