@@ -76,6 +76,18 @@
         pp_role: "{{ puppet_role }}"
         pp_environment: "{{ puppet_environment }}"
 
+- name: Create /etc/puppetlabs/facter/facts.d/ directory
+  file:
+    path: /etc/puppetlabs/facter/facts.d/
+    state: directory
+    recurse: "yes"
+
+- name: Create ec2_userdata.txt file
+  copy:
+    dest: /etc/puppetlabs/facter/facts.d/ec2_userdata.txt
+    content: |
+      ec2_userdata=
+
 - name: Create puppet.conf file
   copy:
     dest: /etc/puppetlabs/puppet/puppet.conf
