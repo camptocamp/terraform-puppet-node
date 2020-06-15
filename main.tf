@@ -2,13 +2,20 @@ resource "puppetdb_node" "this" {
   count = var.instance_count
 
   certname = var.instances[count.index].hostname
+
+  depends_on = [
+    null_resource.provisioner
+  ]
 }
 
 resource "puppetca_certificate" "this" {
   count = var.instance_count
 
-
   name = var.instances[count.index].hostname
+
+  depends_on = [
+    null_resource.provisioner
+  ]
 }
 
 resource "null_resource" "provisioner" {
