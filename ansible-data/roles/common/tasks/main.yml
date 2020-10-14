@@ -41,16 +41,7 @@
       yum_repository:
         name: puppetlabs
         description: Puppetlabs
-        baseurl: http://yum.puppetlabs.com/puppet5/el/$releasever/$basearch/
-    when: ansible_distribution_major_version >= '8'
-  - block:
-    - name: Configure Camptocamp repository
-      yum_repository:
-        name: c2c-puppetlabs
-        description: Camptocamp-$releasever - Puppetlabs
-        baseurl: http://pkg.camptocamp.net/yum/puppetlabs/$releasever/$basearch/
-        gpgcheck: 0
-    when: ansible_distribution_major_version <= '7'
+        baseurl: http://yum.puppet.com/puppet6/el/$releasever/$basearch/
 
   - name: Update all packages to the latest version
     yum:
