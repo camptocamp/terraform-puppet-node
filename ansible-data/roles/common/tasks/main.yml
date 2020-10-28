@@ -41,7 +41,7 @@
       yum_repository:
         name: puppetlabs
         description: Puppetlabs
-        baseurl: http://yum.puppet.com/puppet6/el/$releasever/$basearch/
+        baseurl: http://yum.puppet.com/puppet6/el/{{ansible_distribution_major_version}}/$basearch/
 
   - name: Update all packages to the latest version
     yum:
