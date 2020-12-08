@@ -2,6 +2,18 @@
   hostname:
     name: "{{ hostname }}"
 
+- name: check if cloud.cfg file exists
+  stat:
+    path: /etc/cloud/cloud.cfg
+  register: cloud_cfg
+
+- name: prevent cloud-init from reverting hostname
+  lineinfile:
+    dest: /etc/cloud/cloud.cfg
+    regexp: '^preserve_hostname:.*'
+    line: 'preserve_hostname: true'
+  when: cloud_cfg.stat.exists == true
+
 - block:
   - name: Update all packages to the latest version
     apt:
@@ -20,19 +32,23 @@
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - block:
-  - name: Configure Camptocamp repository
-    yum_repository:
-      name: c2c-puppetlabs
-      description: Camptocamp-$releasever - Puppetlabs
-      baseurl: http://pkg.camptocamp.net/yum/puppetlabs/$releasever/$basearch/
-      gpgcheck: 0
+  - block:
+    - name: Add PuppetLabs key
+      rpm_key:
+        key: https://yum.puppet.com/RPM-GPG-KEY-puppet
+        state: present
+    - name: Configure PuppetLabs repository
+      yum_repository:
+        name: puppetlabs
+        description: Puppetlabs
+        baseurl: http://yum.puppet.com/puppet6/el/{{ansible_distribution_major_version}}/$basearch/
 
   - name: Update all packages to the latest version
     yum:
       update_cache: yes
       name: '*'
       state: latest
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
 
 - name: Create /etc/puppetlabs/puppet directory
   file:
@@ -50,6 +66,18 @@
       extension_requests:
         pp_role: "{{ puppet_role }}"
         pp_environment: "{{ puppet_environment }}"
+
+- name: Create /etc/puppetlabs/facter/facts.d/ directory
+  file:
+    path: /etc/puppetlabs/facter/facts.d/
+    state: directory
+    recurse: "yes"
+
+- name: Create ec2_userdata.txt file
+  copy:
+    dest: /etc/puppetlabs/facter/facts.d/ec2_userdata.txt
+    content: |
+      ec2_userdata=
 
 - name: Create puppet.conf file
   copy:

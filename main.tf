@@ -2,13 +2,20 @@ resource "puppetdb_node" "this" {
   count = var.instance_count
 
   certname = var.instances[count.index].hostname
+
+  depends_on = [
+    null_resource.provisioner
+  ]
 }
 
 resource "puppetca_certificate" "this" {
   count = var.instance_count
 
-
   name = var.instances[count.index].hostname
+
+  depends_on = [
+    null_resource.provisioner
+  ]
 }
 
 resource "null_resource" "provisioner" {
@@ -63,6 +70,11 @@ resource "null_resource" "provisioner" {
 
         foo = join(" ", var.deps_on)
       }
+    }
+
+    ansible_ssh_settings {
+      connect_timeout_seconds = 60
+      insecure_no_strict_host_key_checking = true
     }
   }
 }
