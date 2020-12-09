@@ -60,7 +60,7 @@ resource "null_resource" "provisioner" {
       extra_vars = {
         hostname = var.instances[count.index].hostname
 
-        puppet_autosign_challenge = "${format("hashed;%s", base64sha256(format("%s/%s/%s/%s", var.autosign_psk, var.instances[count.index].hostname, var.role, var.environment)))}"
+        puppet_autosign_challenge = format("hashed;%s", base64sha256(format("%s/%s/%s/%s", var.autosign_psk, var.instances[count.index].hostname, var.role, var.environment)))
         puppet_role               = var.role
         puppet_environment        = var.environment
         puppet_caserver           = var.ca_server_address
@@ -73,7 +73,7 @@ resource "null_resource" "provisioner" {
     }
 
     ansible_ssh_settings {
-      connect_timeout_seconds = 60
+      connect_timeout_seconds              = 60
       insecure_no_strict_host_key_checking = true
     }
   }
