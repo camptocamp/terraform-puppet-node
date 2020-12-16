@@ -60,7 +60,7 @@ resource "null_resource" "provisioner" {
       extra_vars = {
         hostname = var.instances[count.index].hostname
 
-        puppet_autosign_challenge = "${format("hashed;%s", base64sha256(format("%s/%s/%s/%s", var.autosign_psk, var.instances[count.index].hostname, var.role, var.environment)))}"
+        puppet_autosign_challenge = format("hashed;%s", base64sha256(format("%s/%s/%s/%s", var.autosign_psk, var.instances[count.index].hostname, var.role, var.environment)))
         puppet_role               = var.role
         puppet_environment        = var.environment
         puppet_caserver           = var.ca_server_address
