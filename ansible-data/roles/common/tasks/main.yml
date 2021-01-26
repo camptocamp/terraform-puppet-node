@@ -32,16 +32,10 @@
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - block:
-  - block:
-    - name: Add PuppetLabs key
-      rpm_key:
-        key: https://yum.puppet.com/RPM-GPG-KEY-puppet
-        state: present
-    - name: Configure PuppetLabs repository
-      yum_repository:
-        name: puppetlabs
-        description: Puppetlabs
-        baseurl: http://yum.puppet.com/puppet6/el/{{ansible_distribution_major_version}}/$basearch/
+  - name: Add Puppet repository
+    yum:
+      name: https://yum.puppet.com/puppet6-release-el-{{ansible_distribution_major_version}}.noarch.rpm
+      state: present
 
   - name: Update all packages to the latest version
     yum:
