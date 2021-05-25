@@ -36,6 +36,7 @@
     yum:
       name: https://yum.puppet.com/puppet6-release-el-{{ansible_distribution_major_version}}.noarch.rpm
       state: present
+      disable_gpg_check: yes
 
   - name: Update all packages to the latest version
     yum:
