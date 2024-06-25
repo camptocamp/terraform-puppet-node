@@ -15,20 +15,23 @@
   when: cloud_cfg.stat.exists == true
 
 - block:
-  - block:
-    - name: override ansible_python_interpreter on Bullseye
-      set_fact:
-        ansible_python_interpreter: /usr/bin/python3
-    - name: Install gpg package for apt-key
-      apt:
-        name: gpg
-        state: present
-        update_cache: true
-    when: ansible_distribution_major_version >= "11"
+  - name: override ansible_python_interpreter on Bullseye
+    set_fact:
+      ansible_python_interpreter: /usr/bin/python3
+    when: ansible_distribution_major_version == "11"
 
   - name: Update all packages to the latest version
     apt:
+      update_cache: yes
       upgrade: dist
+
+  - name: Install prerequisite packages
+    apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+     - gpg
+     - cron
 
   - name: Add Camptocamp key
     apt_key:
@@ -76,11 +79,12 @@
   copy:
     dest: /etc/puppetlabs/puppet/csr_attributes.yaml
     content: |
+      ---
       custom_attributes:
-        1.2.840.113549.1.9.7: "{{ puppet_autosign_challenge }}"
+        1.2.840.113549.1.9.7: '{{ puppet_autosign_challenge }}'
       extension_requests:
-        pp_role: "{{ puppet_role }}"
-        pp_environment: "{{ puppet_environment }}"
+        pp_role: '{{ puppet_role }}'
+        pp_environment: '{{ puppet_environment }}'
 
 - name: Create /etc/puppetlabs/facter/facts.d/ directory
   file:
@@ -108,6 +112,7 @@
       show_diff = true
       splay = true
       usecacheonfailure = false
+      certificate_revocation = false
 
 - name: Install Puppet
   package:
@@ -116,9 +121,8 @@
 
 - name: Run Puppet
   command: /opt/puppetlabs/bin/puppet agent -t
-  args:
-    creates: /etc/puppetlabs/puppet/ssl/certs/ca.pem
-  ignore_errors: true
+  register: result
+  failed_when: result.rc == 1 or result.rc > 2
 
 - name: Reboot (first run only)
   shell: sleep 2 && reboot
