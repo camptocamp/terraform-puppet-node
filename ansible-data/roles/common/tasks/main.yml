@@ -38,7 +38,7 @@
 
   - name: Configure Camptocamp repository
     apt_repository:
-      repo: deb http://pkg.camptocamp.net/apt {{ ansible_distribution_release }}/staging sysadmin docker
+      repo: deb http://pkg.camptocamp.com/apt {{ ansible_distribution_release }}/staging sysadmin docker
       state: present
 
   - name: Set Camptocamp repository priority
